@@ -42,6 +42,7 @@ class MainActivity : AppCompatActivity(), OnTaskClickListener {
     }
 
     private fun displayTasks(tasks: MutableList<Task>) {
+        sortTasksByDueDate(tasks)
         taskAdapter.updateTasks(tasks)
     }
 
@@ -49,7 +50,7 @@ class MainActivity : AppCompatActivity(), OnTaskClickListener {
         CoroutineScope(Dispatchers.IO).launch {
             val tasks = taskDao.getAllTasks()
             withContext(Dispatchers.Main) {
-                taskAdapter.updateTasks(tasks.toMutableList())
+                displayTasks(tasks.toMutableList())
             }
         }
     }

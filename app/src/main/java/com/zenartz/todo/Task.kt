@@ -2,6 +2,7 @@ package com.zenartz.todo
 
 import android.os.Parcel
 import android.os.Parcelable
+import androidx.annotation.NonNull
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import java.util.Date
@@ -9,9 +10,9 @@ import java.util.Date
 @Entity(tableName = "tasks")
 data class Task(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
-    val name: String,
-    val description: String,
-    val dueDate: Date,
+    @NonNull val name: String,
+    val description: String?,
+    @NonNull val dueDate: Date,
     var isCompleted: Boolean = false
 ) : Parcelable {
     constructor(parcel: Parcel) : this(
@@ -42,5 +43,9 @@ data class Task(
         override fun newArray(size: Int): Array<Task?> {
             return arrayOfNulls(size)
         }
+    }
+
+    fun compareTo(other: Task): Int {
+        return this.dueDate.compareTo(other.dueDate)
     }
 }

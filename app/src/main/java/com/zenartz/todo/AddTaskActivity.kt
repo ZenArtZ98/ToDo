@@ -41,6 +41,7 @@ class AddTaskActivity : AppCompatActivity() {
                 val taskDescription = findViewById<EditText>(R.id.task_description).text.toString()
                 val dueDate = selectedDate ?: throw IllegalStateException("No date selected")
 
+
                 CoroutineScope(Dispatchers.IO).launch {
                     val task = Task(name = taskName, description = taskDescription, dueDate = dueDate)
                     taskDao.addTask(task)
