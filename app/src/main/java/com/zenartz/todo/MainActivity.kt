@@ -20,8 +20,6 @@ class MainActivity : AppCompatActivity(), OnTaskClickListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-//        supportActionBar?.setDisplayHomeAsUpEnabled(true)
-//        supportActionBar?.setHomeButtonEnabled(true)
         setContentView(R.layout.activity_main)
 
         taskDao = TaskDatabase.getInstance(this).taskDao()
@@ -40,20 +38,6 @@ class MainActivity : AppCompatActivity(), OnTaskClickListener {
 
         loadTasks()
     }
-//    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-//        menuInflater.inflate(R.menu.back_menu, menu)
-//        return true
-//    }
-//
-//    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-//        return when (item.itemId) {
-//            R.id.action_back -> {
-//                finish()
-//                true
-//            }
-//            else -> super.onOptionsItemSelected(item)
-//        }
-//    }
 
     private fun sortTasksByDueDate(tasks: MutableList<Task>) {
         tasks.sortBy { it.dueDate }

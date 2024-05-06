@@ -2,6 +2,7 @@ package com.zenartz.todo
 
 import android.content.Context
 import android.graphics.Color
+import android.graphics.Paint
 import android.icu.text.SimpleDateFormat
 import android.icu.util.Calendar
 import android.view.LayoutInflater
@@ -10,14 +11,18 @@ import android.view.ViewGroup
 import android.widget.CheckBox
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import java.util.Date
 import java.util.Locale
 
 interface OnTaskClickListener {
     fun onTaskClick(task: Task)
 }
 
-class TaskAdapter(private val context: Context, private var _tasks: MutableList<Task>, private val onTaskClickListener: OnTaskClickListener) :
-    RecyclerView.Adapter<TaskAdapter.TaskViewHolder>() {
+class TaskAdapter(
+    private val context: Context,
+    private var _tasks: MutableList<Task> = mutableListOf(),
+    private val onTaskClickListener: OnTaskClickListener? = null
+) : RecyclerView.Adapter<TaskAdapter.TaskViewHolder>() {
 
     val tasks: List<Task>
         get() = _tasks
@@ -36,7 +41,7 @@ class TaskAdapter(private val context: Context, private var _tasks: MutableList<
         holder.taskDueDate.text = dateFormat.format(task.dueDate)
         // Bind other task properties to views here
         holder.itemView.setOnClickListener {
-            onTaskClickListener.onTaskClick(task)
+            onTaskClickListener?.onTaskClick(task)
         }
     }
 
@@ -50,28 +55,43 @@ class TaskAdapter(private val context: Context, private var _tasks: MutableList<
         notifyDataSetChanged()
     }
 
+    fun toggleTaskStatus(position: Int) {
+        val task = tasks[position]
+        task.isCompleted = !task.isCompleted
+        notifyItemChanged(position)
+    }
+
     inner class TaskViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val taskTitle: TextView = itemView.findViewById(R.id.task_name)
         val taskDescription: TextView = itemView.findViewById(R.id.task_description)
         val taskDueDate: TextView = itemView.findViewById(R.id.task_due_date)
-        // Declare other views here
-        private val titleTextView: TextView = itemView.findViewById(R.id.task_name)
-        private val descriptionTextView: TextView = itemView.findViewById(R.id.task_description)
-        private val dateTextView: TextView = itemView.findViewById(R.id.task_due_date)
-//        private val completedCheckBox: CheckBox = itemView.findViewById(R.id.completed_check_box)
 
         fun bind(task: Task) {
-            titleTextView.text = task.name
-            descriptionTextView.text = task.description
-//            completedCheckBox.isChecked = task.isCompleted
+            taskTitle.text = task.name
+            taskDescription.text = task.description
 
-            val currentDate = Calendar.getInstance().time
-            if (task.dueDate.before(currentDate)) {
-                dateTextView.setTextColor(Color.RED)
+            updateTaskStatus(task)
+            updateTaskDueDate(task)
+        }
+
+        private fun updateTaskStatus(task: Task) {
+            if (task.isCompleted) {
+                taskTitle.paintFlags = taskTitle.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
+                taskTitle.setTextColor(Color.GRAY)
             } else {
-                dateTextView.setTextColor(itemView.context.getColor(R.color.black))
+                taskTitle.paintFlags = taskTitle.paintFlags and Paint.STRIKE_THRU_TEXT_FLAG.inv()
+                taskTitle.setTextColor(Color.BLACK)
             }
-            dateTextView.text = task.dueDate.toString()
+        }
+        private fun updateTaskDueDate(task: Task) {
+            val currentDate = Date()
+            if (task.dueDate.before(currentDate)) {
+                taskDueDate.setTextColor(Color.RED)
+            } else {
+                taskDueDate.setTextColor(itemView.context.getColor(R.color.black))
+            }
+            val dateFormat = SimpleDateFormat("dd.MM.yy", Locale.getDefault())
+            taskDueDate.text = dateFormat.format(task.dueDate)
         }
     }
 }

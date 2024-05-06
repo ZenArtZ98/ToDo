@@ -19,6 +19,8 @@ import java.util.Locale
 class TaskDetailsActivity : AppCompatActivity() {
     private lateinit var task: Task
     private lateinit var taskDao: TaskDao
+    private lateinit var taskAdapter: TaskAdapter
+    private var currentPosition: Int = -1
 
     private lateinit var taskTitleTextView: TextView
     private lateinit var taskDescriptionTextView: TextView
@@ -33,10 +35,16 @@ class TaskDetailsActivity : AppCompatActivity() {
 
         taskDao = TaskDatabase.getInstance(this).taskDao()
 
+        taskAdapter = TaskAdapter(this)
+
         taskTitleTextView = findViewById(R.id.task_title)
         taskDescriptionTextView = findViewById(R.id.task_description)
         taskDueDateTextView = findViewById(R.id.task_due_date)
         completeTaskButton = findViewById(R.id.complete_task_button)
+
+        completeTaskButton.setOnClickListener {
+            completeTask()
+        }
 
         task = intent.getParcelableExtra("task") ?: throw IllegalArgumentException("Task must be provided")
 
@@ -56,6 +64,19 @@ class TaskDetailsActivity : AppCompatActivity() {
                     Toast.makeText(this@TaskDetailsActivity, "Task completed", Toast.LENGTH_SHORT).show()
                     finish()
                 }
+            }
+        }
+        currentPosition = taskAdapter.tasks.indexOfFirst { it.id == task.id }
+    }
+    private fun completeTask() {
+        CoroutineScope(Dispatchers.IO).launch {
+            task.isCompleted = true
+            taskDao.updateTask(task)
+
+            withContext(Dispatchers.Main) {
+                Toast.makeText(this@TaskDetailsActivity, "Task completed", Toast.LENGTH_SHORT).show()
+                taskAdapter.toggleTaskStatus(currentPosition)
+                finish()
             }
         }
     }
