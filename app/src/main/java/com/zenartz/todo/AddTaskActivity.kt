@@ -2,6 +2,8 @@ package com.zenartz.todo
 
 import android.icu.util.Calendar
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
 import android.widget.EditText
 import android.widget.Toast
 import android.widget.Button
@@ -22,6 +24,8 @@ class AddTaskActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+//        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+//        supportActionBar?.setHomeButtonEnabled(true)
         setContentView(R.layout.activity_add_task)
 
         taskDao = TaskDatabase.getInstance(this).taskDao()
@@ -53,12 +57,29 @@ class AddTaskActivity : AppCompatActivity() {
             }
         }
     }
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.back_menu, menu)
+        return true
+    }
 
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.action_back -> {
+                finish()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
     private fun validateForm(): Boolean {
         val taskName = findViewById<EditText>(R.id.task_name).text.toString()
         val taskDescription = findViewById<EditText>(R.id.task_description).text.toString()
 
-        if (taskName.isEmpty() || taskDescription.isEmpty() || selectedDate == null) {
+        if (taskName.isEmpty()) {
+            Toast.makeText(this, "Введите", Toast.LENGTH_SHORT).show()
+            return false
+        }
+        if (selectedDate == null) {
             Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show()
             return false
         }

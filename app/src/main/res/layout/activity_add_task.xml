@@ -6,19 +6,59 @@
     android:orientation="vertical"
     android:padding="16dp">
 
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Название" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="*"
+            android:textColor="@android:color/holo_red_dark" />
+    </LinearLayout>
+
     <EditText
         android:id="@+id/task_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Task Name"
+        android:hint="Название"
         android:inputType="text" />
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Краткое описание" />
 
     <EditText
         android:id="@+id/task_description"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Task Description"
+        android:hint="Краткое описание"
         android:inputType="textMultiLine" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <TextView
+            android:id="@+id/textView3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Срок выполнения" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="*"
+            android:textColor="@android:color/holo_red_dark" />
+    </LinearLayout>
 
     <CalendarView
         android:id="@+id/due_date_calendar"
@@ -32,6 +72,6 @@
         android:id="@+id/add_task_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Add Task" />
+        android:text="Добавить" />
 
 </LinearLayout>

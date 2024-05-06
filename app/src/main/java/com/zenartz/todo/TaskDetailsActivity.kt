@@ -2,14 +2,18 @@ package com.zenartz.todo
 
 import android.icu.text.SimpleDateFormat
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.Date
 import java.util.Locale
 
 class TaskDetailsActivity : AppCompatActivity() {
@@ -23,6 +27,8 @@ class TaskDetailsActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+//        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+//        supportActionBar?.setHomeButtonEnabled(true)
         setContentView(R.layout.activity_task_details)
 
         taskDao = TaskDatabase.getInstance(this).taskDao()
@@ -38,6 +44,7 @@ class TaskDetailsActivity : AppCompatActivity() {
         taskDescriptionTextView.text = task.description
         val dateFormat = SimpleDateFormat("dd.MM.yy", Locale.getDefault())
         taskDueDateTextView.text = dateFormat.format(task.dueDate)
+        updateDueDateColor()
 
         completeTaskButton.setOnClickListener {
             // Handle task completion
@@ -50,6 +57,30 @@ class TaskDetailsActivity : AppCompatActivity() {
                     finish()
                 }
             }
+        }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.back_menu, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.action_back -> {
+                finish()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    private fun updateDueDateColor() {
+        val currentDate = Date()
+        if (task.dueDate.before(currentDate)) {
+            taskDueDateTextView.setTextColor(ContextCompat.getColor(this, android.R.color.holo_red_dark))
+        } else {
+            taskDueDateTextView.setTextColor(ContextCompat.getColor(this, android.R.color.black))
         }
     }
 }
