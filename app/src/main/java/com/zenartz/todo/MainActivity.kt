@@ -11,7 +11,7 @@ import android.content.Intent
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.*
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), OnTaskClickListener {
     private lateinit var taskDao: TaskDao
     private lateinit var taskAdapter: TaskAdapter
     private lateinit var addTaskButton: FloatingActionButton
@@ -22,7 +22,8 @@ class MainActivity : AppCompatActivity() {
 
         taskDao = TaskDatabase.getInstance(this).taskDao()
 
-        taskAdapter = TaskAdapter(this, mutableListOf())
+        taskAdapter = TaskAdapter(this, mutableListOf(), this)
+
 
         val recyclerView = findViewById<RecyclerView>(R.id.task_list)
         recyclerView.adapter = taskAdapter
@@ -30,8 +31,7 @@ class MainActivity : AppCompatActivity() {
 
         addTaskButton = findViewById<FloatingActionButton>(R.id.add_task_button)
         addTaskButton.setOnClickListener {
-            val intent = Intent(this, AddTaskActivity::class.java)
-            startActivity(intent)
+            startActivity(Intent(this, AddTaskActivity::class.java))
         }
 
         loadTasks()
@@ -46,17 +46,23 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun loadTasks() {
-        lifecycleScope.launch {
-            val tasks = withContext(Dispatchers.IO) {
-                taskDao.getAllTasks()
+        CoroutineScope(Dispatchers.IO).launch {
+            val tasks = taskDao.getAllTasks()
+            withContext(Dispatchers.Main) {
+                taskAdapter.updateTasks(tasks.toMutableList())
             }
-            sortTasksByDueDate(tasks.toMutableList())
-            displayTasks(tasks.toMutableList())
         }
     }
 
     override fun onResume() {
         super.onResume()
         loadTasks()
+    }
+
+    override fun onTaskClick(task: Task) {
+        // Handle task click, e.g., navigate to task details screen
+        val intent = Intent(this, TaskDetailsActivity::class.java)
+        intent.putExtra("task", task)
+        startActivity(intent)
     }
 }
