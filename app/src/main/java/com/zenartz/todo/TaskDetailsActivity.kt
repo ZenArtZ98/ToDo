@@ -100,8 +100,17 @@ class TaskDetailsActivity : AppCompatActivity() {
             taskDao.updateTask(task)
 
             withContext(Dispatchers.Main) {
-                Toast.makeText(this@TaskDetailsActivity, "Задача отмечена выполненной", Toast.LENGTH_SHORT).show()
-                taskAdapter.toggleTaskStatus(currentPosition)
+                Toast.makeText(this@TaskDetailsActivity, "Task completed", Toast.LENGTH_SHORT).show()
+
+                // Найдите индекс задачи в списке задач
+                currentPosition = taskAdapter.tasks.indexOfFirst { it.id == task.id }
+                if (currentPosition != -1) {
+                    taskAdapter.toggleTaskStatus(currentPosition)
+                } else {
+                    // Если задача не найдена, обновите список задач
+                    taskAdapter.updateTasks(taskAdapter.tasks)
+                }
+
                 finish()
             }
         }

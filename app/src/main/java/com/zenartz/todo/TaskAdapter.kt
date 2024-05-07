@@ -8,7 +8,6 @@ import android.icu.util.Calendar
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.CheckBox
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import java.util.Date
@@ -30,6 +29,11 @@ class TaskAdapter(
     val tasks: List<Task>
         get() = _tasks
 
+    companion object {
+        private const val MAX_TITLE_LENGTH = 15
+        private const val MAX_DESCRIPTION_LENGTH = 70
+    }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TaskViewHolder {
         val view = LayoutInflater.from(context).inflate(R.layout.task_item, parent, false)
         return TaskViewHolder(view)
@@ -38,11 +42,14 @@ class TaskAdapter(
     override fun onBindViewHolder(holder: TaskViewHolder, position: Int) {
         val task = _tasks[position]
         holder.bind(task)
-        holder.taskTitle.text = task.name
-        holder.taskDescription.text = task.description
+        holder.taskTitle.text = task.name.take(MAX_TITLE_LENGTH).let {
+            if (it.length == MAX_TITLE_LENGTH) "$it..." else it
+        }
+        holder.taskDescription.text = task.description?.take(MAX_DESCRIPTION_LENGTH)?.let {
+            if (it.length == MAX_DESCRIPTION_LENGTH) "$it..." else it
+        }
         val dateFormat = SimpleDateFormat("dd.MM.yy", Locale.getDefault())
         holder.taskDueDate.text = dateFormat.format(task.dueDate)
-        // Bind other task properties to views here
         holder.itemView.setOnClickListener {
             onTaskClickListener?.onTaskClick(task)
         }
@@ -90,8 +97,12 @@ class TaskAdapter(
         val taskDueDate: TextView = itemView.findViewById(R.id.task_due_date)
 
         fun bind(task: Task) {
-            taskTitle.text = task.name
-            taskDescription.text = task.description
+            taskTitle.text = task.name?.take(MAX_TITLE_LENGTH)?.let {
+                if (it.length == MAX_TITLE_LENGTH) "$it..." else it
+            }
+            taskDescription.text = task.description?.take(MAX_DESCRIPTION_LENGTH)?.let {
+                if (it.length == MAX_DESCRIPTION_LENGTH) "$it..." else it
+            }
 
             updateTaskStatus(task)
             updateTaskDueDate(task)
@@ -108,8 +119,11 @@ class TaskAdapter(
             } else {
                 taskTitle.paintFlags = taskTitle.paintFlags and Paint.STRIKE_THRU_TEXT_FLAG.inv()
                 taskTitle.setTextColor(Color.BLACK)
+                taskDescription.paintFlags = taskDescription.paintFlags and Paint.STRIKE_THRU_TEXT_FLAG.inv()
+                taskDueDate.paintFlags = taskDueDate.paintFlags and Paint.STRIKE_THRU_TEXT_FLAG.inv()
             }
         }
+
         private fun updateTaskDueDate(task: Task) {
             val currentDate = Date()
             if (task.dueDate.before(currentDate)) {
