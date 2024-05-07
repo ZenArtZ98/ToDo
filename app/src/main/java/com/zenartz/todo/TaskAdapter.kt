@@ -101,7 +101,9 @@ class TaskAdapter(
             if (task.isCompleted) {
                 taskTitle.paintFlags = taskTitle.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
                 taskTitle.setTextColor(Color.GRAY)
+                taskDescription.paintFlags = taskDescription.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
                 taskDescription.setTextColor(Color.GRAY)
+                taskDueDate.paintFlags = taskDueDate.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
                 taskDueDate.setTextColor(Color.GRAY)
             } else {
                 taskTitle.paintFlags = taskTitle.paintFlags and Paint.STRIKE_THRU_TEXT_FLAG.inv()

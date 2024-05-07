@@ -10,8 +10,8 @@ import java.util.Date
 @Entity(tableName = "tasks")
 data class Task(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
-    @NonNull val name: String,
-    val description: String?,
+    @NonNull var name: String,
+    var description: String?,
     @NonNull var dueDate: Date,
     var isCompleted: Boolean = false
 ) : Parcelable {

@@ -29,78 +29,78 @@ class TaskDetailsActivity : AppCompatActivity() {
 
     private lateinit var taskTitleTextView: TextView
     private lateinit var taskDescriptionTextView: TextView
-    private lateinit var taskDueDateTextView: TextView
     private lateinit var completeTaskButton: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-//        supportActionBar?.setDisplayHomeAsUpEnabled(true)
-//        supportActionBar?.setHomeButtonEnabled(true)
         setContentView(R.layout.activity_task_details)
 
         taskDao = TaskDatabase.getInstance(this).taskDao()
-
         taskAdapter = TaskAdapter(this)
 
+        // Retrieve the task data from the intent
+        task = intent.getParcelableExtra("task") ?: throw IllegalArgumentException("Данные задачи не предоставлены")
+
+        // Initialize the views
         taskTitleTextView = findViewById(R.id.task_name)
         taskDescriptionTextView = findViewById(R.id.task_description)
-//        taskDueDateTextView = findViewById(R.id.due_date_calendar)
+        calendarView = findViewById(R.id.due_date_calendar)
         completeTaskButton = findViewById(R.id.complete_task_button)
 
-        calendarView = findViewById(R.id.due_date_calendar)
-        calendarView.setOnDateChangeListener { _, year, month, dayOfMonth ->
-            val selectedCalendar = Calendar.getInstance()
-            selectedCalendar.set(year, month, dayOfMonth)
-            selectedDate = selectedCalendar.time
-            updateDueDateText()
-        }
-
+        // Set the initial due date
         val selectedCalendar = Calendar.getInstance()
         selectedCalendar.time = task.dueDate
         calendarView.date = selectedCalendar.timeInMillis
         selectedDate = task.dueDate
-        updateDueDateText()
 
+        // Set the task details
+        taskTitleTextView.text = task.name
+        taskDescriptionTextView.text = task.description
+        updateDueDateColor()
 
-
+        // Set the click listener for the complete task button
         completeTaskButton.setOnClickListener {
             completeTask()
         }
 
-        task = intent.getParcelableExtra("task") ?: throw IllegalArgumentException("Task must be provided")
-
-        taskTitleTextView.text = task.name
-        taskDescriptionTextView.text = task.description
-        val dateFormat = SimpleDateFormat("dd.MM.yy", Locale.getDefault())
-        taskDueDateTextView.text = dateFormat.format(task.dueDate)
-        updateDueDateColor()
-
-        completeTaskButton.setOnClickListener {
-            CoroutineScope(Dispatchers.IO).launch {
-                task.isCompleted = true
-                task.dueDate = selectedDate ?: task.dueDate
-                taskDao.updateTask(task)
-
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(this@TaskDetailsActivity, "Task completed", Toast.LENGTH_SHORT).show()
-                    finish()
-                }
-            }
+        // Set the date change listener for the calendar view
+        calendarView.setOnDateChangeListener { _, year, month, dayOfMonth ->
+            val selectedCalendar = Calendar.getInstance()
+            selectedCalendar.set(year, month, dayOfMonth)
+            selectedDate = selectedCalendar.time
+            updateDueDateColor()
         }
+
         currentPosition = taskAdapter.tasks.indexOfFirst { it.id == task.id }
+
+        val saveTaskButton = findViewById<Button>(R.id.save_task_button)
+        saveTaskButton.setOnClickListener {
+            saveTask()
+        }
+
+        val deleteTaskButton = findViewById<Button>(R.id.delete_task_button)
+        deleteTaskButton.setOnClickListener {
+            deleteTask()
+        }
     }
 
-    private fun updateDueDateText() {
-        val dateFormat = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
-        taskDueDateTextView.text = dateFormat.format(selectedDate ?: task.dueDate)
+    private fun updateDueDateColor() {
+        val currentDate = Date()
+        if (task.dueDate.before(currentDate)) {
+            calendarView.setBackgroundColor(ContextCompat.getColor(this, android.R.color.holo_red_dark))
+        } else {
+            calendarView.setBackgroundColor(ContextCompat.getColor(this, android.R.color.white))
+        }
     }
+
     private fun completeTask() {
         CoroutineScope(Dispatchers.IO).launch {
             task.isCompleted = true
+            task.dueDate = selectedDate ?: task.dueDate
             taskDao.updateTask(task)
 
             withContext(Dispatchers.Main) {
-                Toast.makeText(this@TaskDetailsActivity, "Task completed", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@TaskDetailsActivity, "Задача отмечена выполненной", Toast.LENGTH_SHORT).show()
                 taskAdapter.toggleTaskStatus(currentPosition)
                 finish()
             }
@@ -122,12 +122,32 @@ class TaskDetailsActivity : AppCompatActivity() {
         }
     }
 
-    private fun updateDueDateColor() {
-        val currentDate = Date()
-        if (task.dueDate.before(currentDate)) {
-            taskDueDateTextView.setTextColor(ContextCompat.getColor(this, android.R.color.holo_red_dark))
-        } else {
-            taskDueDateTextView.setTextColor(ContextCompat.getColor(this, android.R.color.black))
+    private fun saveTask() {
+        // Получите данные из полей ввода
+        val taskName = taskTitleTextView.text.toString()
+        val taskDescription = taskDescriptionTextView.text.toString()
+
+        // Обновите задачу в базе данных
+        CoroutineScope(Dispatchers.IO).launch {
+            task.name = taskName
+            task.description = taskDescription
+            task.dueDate = selectedDate ?: task.dueDate
+            taskDao.updateTask(task)
+
+            withContext(Dispatchers.Main) {
+                Toast.makeText(this@TaskDetailsActivity, "Задача сохранена", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    private fun deleteTask() {
+        CoroutineScope(Dispatchers.IO).launch {
+            taskDao.deleteTask(task)
+
+            withContext(Dispatchers.Main) {
+                Toast.makeText(this@TaskDetailsActivity, "Задача удалена", Toast.LENGTH_SHORT).show()
+                finish()
+            }
         }
     }
 }

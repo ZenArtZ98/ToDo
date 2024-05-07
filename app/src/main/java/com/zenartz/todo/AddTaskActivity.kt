@@ -43,7 +43,7 @@ class AddTaskActivity : AppCompatActivity() {
             if (validateForm()) {
                 val taskName = findViewById<EditText>(R.id.task_name).text.toString()
                 val taskDescription = findViewById<EditText>(R.id.task_description).text.toString()
-                val dueDate = selectedDate ?: throw IllegalStateException("No date selected")
+                val dueDate = selectedDate ?: throw IllegalStateException("Дата не выбрана")
 
 
                 CoroutineScope(Dispatchers.IO).launch {
@@ -76,11 +76,11 @@ class AddTaskActivity : AppCompatActivity() {
         val taskDescription = findViewById<EditText>(R.id.task_description).text.toString()
 
         if (taskName.isEmpty()) {
-            Toast.makeText(this, "Введите", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Введите заголовок", Toast.LENGTH_SHORT).show()
             return false
         }
         if (selectedDate == null) {
-            Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Выберите дату", Toast.LENGTH_SHORT).show()
             return false
         }
 
