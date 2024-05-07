@@ -24,6 +24,9 @@ class TaskAdapter(
     private val onTaskClickListener: OnTaskClickListener? = null
 ) : RecyclerView.Adapter<TaskAdapter.TaskViewHolder>() {
 
+    private val completedTasks = mutableListOf<Task>()
+    private val incompleteTasks = mutableListOf<Task>()
+
     val tasks: List<Task>
         get() = _tasks
 
@@ -49,15 +52,35 @@ class TaskAdapter(
         return _tasks.size
     }
 
-    fun updateTasks(newTasks: MutableList<Task>) {
-        _tasks.clear()
-        _tasks.addAll(newTasks)
+    fun updateTasks(newTasks: List<Task>) {
+        completedTasks.clear()
+        incompleteTasks.clear()
+
+        for (task in newTasks) {
+            if (task.isCompleted) {
+                completedTasks.add(task)
+            } else {
+                incompleteTasks.add(task)
+            }
+        }
+
+        _tasks = (incompleteTasks + completedTasks).toMutableList()
         notifyDataSetChanged()
     }
 
     fun toggleTaskStatus(position: Int) {
-        val task = tasks[position]
+        val task = _tasks[position]
         task.isCompleted = !task.isCompleted
+
+        if (task.isCompleted) {
+            completedTasks.add(task)
+            incompleteTasks.remove(task)
+        } else {
+            incompleteTasks.add(task)
+            completedTasks.remove(task)
+        }
+
+        _tasks = (incompleteTasks + completedTasks).toMutableList()
         notifyItemChanged(position)
     }
 
@@ -78,6 +101,8 @@ class TaskAdapter(
             if (task.isCompleted) {
                 taskTitle.paintFlags = taskTitle.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
                 taskTitle.setTextColor(Color.GRAY)
+                taskDescription.setTextColor(Color.GRAY)
+                taskDueDate.setTextColor(Color.GRAY)
             } else {
                 taskTitle.paintFlags = taskTitle.paintFlags and Paint.STRIKE_THRU_TEXT_FLAG.inv()
                 taskTitle.setTextColor(Color.BLACK)

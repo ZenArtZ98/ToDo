@@ -12,7 +12,7 @@ data class Task(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     @NonNull val name: String,
     val description: String?,
-    @NonNull val dueDate: Date,
+    @NonNull var dueDate: Date,
     var isCompleted: Boolean = false
 ) : Parcelable {
     constructor(parcel: Parcel) : this(
